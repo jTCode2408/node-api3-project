@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validatePostId,(req, res) => {
  //get post by id
  const {id}=req.params
  Posts.getById(id)
@@ -29,7 +29,7 @@ router.get('/:id', (req, res) => {
  })
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validatePostId,(req, res) => {
   // delete post by id
   const {id} = req.params;
 const deletePost = req.body;
@@ -48,7 +48,7 @@ if (!deletedPost){
  })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validatePostId, (req, res) => {
   // edits post by POST ID
 const {id} = req.params;
 const editPost = req.body;
@@ -71,10 +71,41 @@ Posts.update(id, editPost)
 
 });
 
+//add post for user
+router.post('/:id/posts', (req,res)=>{
+const newPost = req.body;
+if(!newPost.text){
+    res.status(400).json({errorMessage: "Please provide title and contents for the post." })
+} else{
+Posts.insert(newPost)
+.then(adding =>{
+    res.status(201).json(newPost);
+
+})
+.catch(err=>{
+    console.log(err)
+    res.status(500).json({ error: "There was an error while saving the post to the database" })
+})
+}
+})
+
+
 // custom middleware
 
+function postHeader(req,res,next){
+  req.post=post
+  next()
+}
 function validatePostId(req, res, next) {
-  // do your magic!
+  const {id}=req.params;
+  console.log('validating ID')
+  Posts.getById(id)
+    if(id){
+  res.status(200).json(postHeader)
+    }else{
+      res.send(400).json({error:"invalid post ID"})
+    }
+  next()
 }
 
 module.exports = router;

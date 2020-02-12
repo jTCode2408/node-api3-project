@@ -4,28 +4,28 @@ const router = express.Router();
 router.use(express.json())
 router.post('/', (req, res) => {
   //adds new user
-const newUser = req.body;
-Users.insert(req.body)
-.then(added=>{
-  res.status(201).json(added)
-})
-.catch(err=>{
-  console.log('posting Post error',err)
-  res.status(500).json({error:"could not add new user "})
+  const newUser = req.body;
+  // if(!newUser.name){
+  //     res.status(400).json({errorMessage: "Please provide name for user" })
+  // } else{
+  Users.insert(newUser)
+  .then(adding =>{
+      res.status(201).json(adding);
+
+  })
+  .catch(err=>{
+      console.log(err)
+      res.status(500).json({ error: "There was an error while saving the post to the database" })
+  })
+// }
 })
 
-});
-
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts',validateUserId, (req, res) => {
 //adds post for selected user ID
 const newPost = req.body;
 const {id}=req.params;
 Users.getById(id)
 .then(userID =>{
-  if(!userID){
-    res.status(404).json({error:"no user with that ID found"})
-    // res.status(200).json(userID)
-  } else {
     Users.insert(newPost)
     .then(post =>{
       res.status(201).json(newPost)
@@ -34,7 +34,6 @@ Users.getById(id)
       console.log(err)
       res.status(500).json({error:"unable to add post"})
     })
-  }
 })
 .catch(err=>{
   console.log(err)
@@ -55,7 +54,7 @@ router.get('/', (req, res) => {
   })
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
   //gets user by ID
   const {id}=req.params
   Users.getById(id)
@@ -70,7 +69,7 @@ router.get('/:id', (req, res) => {
 
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts',validateUserId, (req, res) => {
   //get all posts from specific user
 const {id}=req.params;
 
@@ -97,7 +96,7 @@ res.status(404).json({error:"user with that ID not found"})
 
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id',validateUserId, (req, res) => {
   //deletes user by id
 const {id} = req.params;
 const deleteUser = req.body;
@@ -116,7 +115,7 @@ if (!user){
  })
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', validateUserId,(req, res) => {
   //edit user by id
 const editUser =req.body
 const {id}=req.params
@@ -143,9 +142,18 @@ Users.update(id, editUser)
 //custom middleware
 
 function validateUserId(req, res, next) {
-
-  // do your magic!
+const user = req.user
+const {id}=req.params
+console.log('validating ID')
+  if(id){
+    res.status(200).json(req.user)
+    console.log('REQ USER', req.user)
+  next()
+  }else{
+    res.status(400).json({error:"could not validate user ID"})
+  }
 }
+
 
 function validateUser(req, res, next) {
   // do your magic!
