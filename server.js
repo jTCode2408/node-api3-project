@@ -4,12 +4,14 @@ const server = express();
 const userRouter =require('./users/userRouter');
 const postRouter =require('./posts/postRouter');
 
+
+server.use("/users", userRouter)
 //middleware
 server.use(express.json());
 server.use(hemlet());
 
 
-//custom middleware
+//pull in custom middleware
 
 function logger(req, res, next) {
 
