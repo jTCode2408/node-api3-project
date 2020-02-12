@@ -3,12 +3,12 @@ const hemlet = require('helmet')
 const server = express();
 const userRouter =require('./users/userRouter');
 const postRouter =require('./posts/postRouter');
-
+server.use(express.json());
 //routers
 server.use("/users", userRouter)
 server.use("/posts", postRouter)
 //middleware
-server.use(express.json());
+
 server.use(hemlet());
 
 

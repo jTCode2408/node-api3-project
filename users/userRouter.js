@@ -1,7 +1,7 @@
 const express = require('express');
 const Users = require('./userDb');
 const router = express.Router();
-
+router.use(express.json())
 router.post('/', (req, res) => {
   //adds new user
 const newUser = req.body;
@@ -122,17 +122,20 @@ const editUser =req.body
 const {id}=req.params
 
 Users.update(id, editUser)
-.then(editing=>{
-  // if(!editUser.name){
-  //   res.status(400).json({error:"user with specified ID not found"})
-  // }else{
-    res.status(201).json(editUser)
-  // }
+.then(userEditing=>{
+  if(userEditing){
+    if(editUser.name){
+    res.status(200).json(editUser)
+    }else{
+    res.status(400).json({error:"please add name for user"})
+  }
+}else{
+  res.status(400).json({error:"cannot find user with specified ID"})
+}
 })
-
 .catch(err=>{
   console.log(err)
-  res.status(500).json({error:"user information could not be edited"})
+  res.status(500).json({error:"unable to edit user"})
 })
 
 });

@@ -1,6 +1,7 @@
 const express = require('express');
 const Posts = require('./postDb');
 const router = express.Router();
+router.use(express.json())
 
 router.get('/', (req, res) => {
 //gets all posts
@@ -48,9 +49,25 @@ if (!deletedPost){
 });
 
 router.put('/:id', (req, res) => {
-  // edits post by id
-
-
+  // edits post by POST ID
+const {id} = req.params;
+const editPost = req.body;
+Posts.update(id, editPost)
+.then(post=>{
+  if(post){
+    if(editPost.text){
+    res.status(200).json(editPost)
+    }else{
+    res.status(400).json({error:"please add text for post"})
+  }
+}else{
+  res.status(400).json({error:"cannot find post with specified ID"})
+}
+})
+.catch(err=>{
+  console.log(err)
+  res.status(500).json({error:"unable to edit post"})
+})
 
 });
 
