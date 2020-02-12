@@ -51,7 +51,7 @@ router.get('/', (req, res) => {
   })
   .catch(err=>{
     console.log(err)
-    res.status(500).json({error:'could not get posts'})
+    res.status(500).json({error:'could not get users'})
   })
 });
 

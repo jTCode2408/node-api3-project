@@ -4,8 +4,9 @@ const server = express();
 const userRouter =require('./users/userRouter');
 const postRouter =require('./posts/postRouter');
 
-
+//routers
 server.use("/users", userRouter)
+server.use("/posts", postRouter)
 //middleware
 server.use(express.json());
 server.use(hemlet());
