@@ -17,7 +17,6 @@ console.log(`used this is method ${req.method}, to this URL ${req.originalUrl}, 
 next()
 }
 
-
 //routes
 server.get('/', logger, (req, res) => {
   console.log('server start res')

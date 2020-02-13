@@ -92,20 +92,17 @@ Posts.insert(newPost)
 
 // custom middleware
 
-function postHeader(req,res,next){
-  req.post=post
-  next()
-}
+
 function validatePostId(req, res, next) {
-  const {id}=req.params;
-  console.log('validating ID')
-  Posts.getById(id)
-    if(id){
-  res.status(200).json(postHeader)
-    }else{
-      res.send(400).json({error:"invalid post ID"})
-    }
-  next()
+  // const {id}=req.params;
+  // console.log('validating ID')
+  // Posts.getById(id)
+  //   if(id){
+  // res.status(200).json(post)
+  //   }else{
+  //     res.send(400).json({error:"invalid post ID"})
+  //   }
+  // next()
 }
 
 module.exports = router;
