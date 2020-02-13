@@ -3,25 +3,24 @@ const Users = require('./userDb');
 const Posts = require('../posts/postDb');
 
 const router = express.Router();
-router.use(express.json())
-router.post('/', (req, res) => {
-  const addUser =req.body
-  const {id}=req.params
-  Users.insert(id, addUser)
-  .then(newUser =>{
-  res.status(201).json(addUser)
-  })
-  .catch(err=>{
-    console.log(err)
-    res.status(500).json({error:"unable to add user"})
-  })
+// router.use(express.json())
+router.post('/', validateUser, (req, res) => {
+  const newUser = req.body;
+
+    Users.insert(newUser)
+      .then(user=>{
+          res.status(201).json(user)
+        })
+     .catch(err=>{
+       console.log(err)
+      res.status(500).json({message: 'server error'})
+     })
 
 });
 
 router.post('/:id/posts',validateUserId, validatePost, (req, res) => {
-//adds post for selected user ID
+//adds post for selected user 
 const newPost = req.body;
-// newPost.user_id = req.params.id;
 Posts.insert(newPost)
 .then(post=>{
   res.status(201).json(post)
@@ -30,10 +29,7 @@ Posts.insert(newPost)
   console.log(err)
   res.status(500).json({error:"internal server error"})
 })
-
 })
-
-
 
 router.get('/', (req, res) => {
   //gets all users
@@ -96,7 +92,6 @@ res.status(201).json(editUser)
 });
 
 //custom middleware
-
 function validateUserId(req, res, next) {
 // const user = req.user
 const {id}=req.params
@@ -116,8 +111,6 @@ Users.getById(id)
   res.status(500).json({error:"server error"})
 })
 }
-
-
 function validateUser(req, res, next) {
   //validates name on users
 const body = req.body;
