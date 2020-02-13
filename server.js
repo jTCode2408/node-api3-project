@@ -1,22 +1,17 @@
 const express = require('express');
-const hemlet = require('helmet')
+const helmet = require('helmet')
 const server = express();
-const userRouter =require('./users/userRouter');
-const postRouter =require('./posts/postRouter');
+const router = require('./router')
+
 server.use(express.json());
 //routers
-server.use("/users", logger, userRouter)
-server.use("/posts", logger, postRouter)
+server.use('/api', logger, router)
 //middleware
 
-server.use(hemlet());
+// server.use(helmet());
 server.use(logger);//use logger globally
 
 //pull in custom middleware
-// function timestamp(req,res,next) { 
-//   req.time= Date.now()
-// next()
-// }
 function logger(req, res, next) {
 console.log(`used this is method ${req.method}, to this URL ${req.originalUrl}, at this time ` +  Date.now())
 next()

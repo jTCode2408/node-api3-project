@@ -1,30 +1,31 @@
 const express = require('express');
 const Users = require('./userDb');
-const Posts = require('..posts/postDb');
+const Posts = require('../posts/postDb');
+
 const router = express.Router();
 router.use(express.json())
-router.post('/', validateUser, (req, res) => {
-  const newUser = req.body;
-    Users.insert(newUser)
-      .then(user=>{
-        res.status(201).json(user)
-      })
-      .catch(err=>{
-        console.log(err)
-        res.status(500).json({message: 'server error'})
-      })
+router.post('/', (req, res) => {
+  const addUser =req.body
+  const {id}=req.params
+  Users.insert(id, addUser)
+  .then(newUser =>{
+  res.status(201).json(addUser)
+  })
+  .catch(err=>{
+    console.log(err)
+    res.status(500).json({error:"unable to add user"})
+  })
 
 });
 
 router.post('/:id/posts',validateUserId, validatePost, (req, res) => {
 //adds post for selected user ID
 const newPost = req.body;
-newPost.user_id = req.params.id;
+// newPost.user_id = req.params.id;
 Posts.insert(newPost)
 .then(post=>{
   res.status(201).json(post)
 })
-
 .catch(err=>{
   console.log(err)
   res.status(500).json({error:"internal server error"})
@@ -48,16 +49,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', validateUserId, (req, res) => {
   //gets user by ID
-  const {id}=req.params
-  Users.getById(id)
-  .then(
-    res.status(200).json(req.user)
-  )
-  
-  .catch(err=>{
-    console.log(err)
-    res.status(500).json({error:"user with specified ID not found"})
-  })
+res.status(200).json(req.user)
 
 });
 
@@ -65,27 +57,14 @@ router.get('/:id/posts',validateUserId, (req, res) => {
   //get all posts from specific user
 const {id}=req.params;
 
-Users.getById(id)
-.then(user=>{
-if(!user){
-res.status(404).json({error:"user with that ID not found"})
-} else{
   Users.getUserPosts(id)
   .then(userPosts=>{
     res.status(200).json(userPosts)
   })
   .catch(err=>{
     console.log(err)
-    res.status(400).json({error:"unable to retrieve posts by specified user"})
+    res.status(500).json({error:"unable to retrieve posts by specified user"})
   })
-} //end of if/else block
-
-})
-.catch(err=>{
-  console.log(err)
-  res.status(500).json({error:"Posts could not be retrieved"})
-})
-
 });
 
 router.delete('/:id',validateUserId, (req, res) => {
@@ -93,14 +72,9 @@ router.delete('/:id',validateUserId, (req, res) => {
 const {id} = req.params;
 const deleteUser = req.body;
  Users.remove(id)
- .then(user=>{
-if (!user){
-  res.status(404).json({error:"user with specified ID does not exist"})
-} else{
-  res.status(200).json({deleteUser})
-}
+ .then(deleted=>{
+   res.status(200).json(deleted)
  })
- 
  .catch(err=>{
    console.log(err)
    res.status(500).json({error:"Unable to delete user"})
@@ -113,21 +87,12 @@ const editUser =req.body
 const {id}=req.params
 Users.update(id, editUser)
 .then(userEditing=>{
-  if(userEditing){
-    if(editUser.name){
-    res.status(200).json(editUser)
-    }else{
-    res.status(400).json({error:"please add name for user"})
-  }
-}else{
-  res.status(400).json({error:"cannot find user with specified ID"})
-}
+res.status(201).json(editUser)
 })
 .catch(err=>{
   console.log(err)
   res.status(500).json({error:"unable to edit user"})
 })
-
 });
 
 //custom middleware
@@ -154,8 +119,10 @@ Users.getById(id)
 
 
 function validateUser(req, res, next) {
+  //validates name on users
 const body = req.body;
 const keys =Object.keys(body);
+console.log('validating USer', req.body)
 if(keys.length===0){
   res.status(400).json({error:"no user data found"})
 } if(!body.name){
@@ -167,8 +134,10 @@ next()
 }
 
 function validatePost(req, res, next) {
+  //validates text on posts
   const body = req.body
   const keys = Object.keys(body);
+  console.log('ValidatingPOST', req.body)
   if (keys.length === 0){
     return res.status(400).json({message:'no post found'})
   }
