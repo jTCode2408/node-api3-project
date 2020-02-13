@@ -1,46 +1,38 @@
 const express = require('express');
 const Users = require('./userDb');
+const Posts = require('..posts/postDb');
 const router = express.Router();
 router.use(express.json())
-router.post('/', (req, res) => {
-  //adds new user
+router.post('/', validateUser, (req, res) => {
   const newUser = req.body;
-  // if(!newUser.name){
-  //     res.status(400).json({errorMessage: "Please provide name for user" })
-  // } else{
-  Users.insert(newUser)
-  .then(adding =>{
-      res.status(201).json(adding);
-
-  })
-  .catch(err=>{
-      console.log(err)
-      res.status(500).json({ error: "There was an error while saving the post to the database" })
-  })
-// }
-})
-
-router.post('/:id/posts',validateUserId, (req, res) => {
-//adds post for selected user ID
-const newPost = req.body;
-const {id}=req.params;
-Users.getById(id)
-.then(userID =>{
-    Users.insert(newPost)
-    .then(post =>{
-      res.status(201).json(newPost)
-    })
-    .catch(err=>{
-      console.log(err)
-      res.status(500).json({error:"unable to add post"})
-    })
-})
-.catch(err=>{
-  console.log(err)
-  res.status(500).json({error:"Post information unavailable."})
-})
+    Users.insert(newUser)
+      .then(user=>{
+        res.status(201).json(user)
+      })
+      .catch(err=>{
+        console.log(err)
+        res.status(500).json({message: 'server error'})
+      })
 
 });
+
+router.post('/:id/posts',validateUserId, validatePost, (req, res) => {
+//adds post for selected user ID
+const newPost = req.body;
+newPost.user_id = req.params.id;
+Posts.insert(newPost)
+.then(post=>{
+  res.status(201).json(post)
+})
+
+.catch(err=>{
+  console.log(err)
+  res.status(500).json({error:"internal server error"})
+})
+
+})
+
+
 
 router.get('/', (req, res) => {
   //gets all users
@@ -115,11 +107,10 @@ if (!user){
  })
 });
 
-router.put('/:id', validateUserId,(req, res) => {
+router.put('/:id', validateUserId, validateUser,(req, res) => {
   //edit user by id
 const editUser =req.body
 const {id}=req.params
-
 Users.update(id, editUser)
 .then(userEditing=>{
   if(userEditing){
@@ -144,24 +135,48 @@ Users.update(id, editUser)
 function validateUserId(req, res, next) {
 // const user = req.user
 const {id}=req.params
+console.log('validating ID', id) 
 Users.getById(id)
-console.log('validating ID', id) //breaks after here
-  if(id){
-    req.user=user
-    console.log('REQ USER', req.user)
-  next()
+.then(user=>{
+  req.user=user
+  if(user){
+  console.log('REQ USER', req.user)
+ next()
   }else{
     res.status(400).json({error:"could not validate user ID"})
-  }
+  } 
+})
+.catch(err=>{
+  console.log(err)
+  res.status(500).json({error:"server error"})
+})
 }
 
 
 function validateUser(req, res, next) {
-  // do your magic!
+const body = req.body;
+const keys =Object.keys(body);
+if(keys.length===0){
+  res.status(400).json({error:"no user data found"})
+} if(!body.name){
+  res.status(400).json({error:"missing name"})
+
+}
+next()
+
 }
 
 function validatePost(req, res, next) {
-  // do your magic!
+  const body = req.body
+  const keys = Object.keys(body);
+  if (keys.length === 0){
+    return res.status(400).json({message:'no post found'})
+  }
+  else if (!body.text){
+    console.log(body);
+    return res.status(400).json({message:'missing text'})
+  }
+  next();
 }
 
 module.exports = router;
