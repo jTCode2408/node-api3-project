@@ -5,8 +5,8 @@ const Posts = require('../posts/postDb');
 const router = express.Router();
 // router.use(express.json())
 router.post('/', validateUser, (req, res) => {
+  //get all users
   const newUser = req.body;
-
     Users.insert(newUser)
       .then(user=>{
           res.status(201).json(user)
@@ -42,7 +42,6 @@ router.get('/', (req, res) => {
     res.status(500).json({error:'could not get users'})
   })
 });
-
 router.get('/:id', validateUserId, (req, res) => {
   //gets user by ID
 res.status(200).json(req.user)
@@ -52,7 +51,6 @@ res.status(200).json(req.user)
 router.get('/:id/posts',validateUserId, (req, res) => {
   //get all posts from specific user
 const {id}=req.params;
-
   Users.getUserPosts(id)
   .then(userPosts=>{
     res.status(200).json(userPosts)
