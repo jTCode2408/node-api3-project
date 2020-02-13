@@ -58,9 +58,9 @@ router.get('/:id', validateUserId, (req, res) => {
   //gets user by ID
   const {id}=req.params
   Users.getById(id)
-  .then(user=>{
-    res.status(200).json(user)
-  })
+  .then(
+    res.status(200).json(req.user)
+  )
   
   .catch(err=>{
     console.log(err)
@@ -142,11 +142,12 @@ Users.update(id, editUser)
 //custom middleware
 
 function validateUserId(req, res, next) {
-const user = req.user
+// const user = req.user
 const {id}=req.params
-console.log('validating ID')
+Users.getById(id)
+console.log('validating ID', id) //breaks after here
   if(id){
-    res.status(200).json(req.user)
+    req.user=user
     console.log('REQ USER', req.user)
   next()
   }else{

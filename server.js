@@ -5,8 +5,8 @@ const userRouter =require('./users/userRouter');
 const postRouter =require('./posts/postRouter');
 server.use(express.json());
 //routers
-server.use("/users", userRouter)
-server.use("/posts", postRouter)
+server.use("/users", logger, userRouter)
+server.use("/posts", logger, postRouter)
 //middleware
 
 server.use(hemlet());
@@ -18,7 +18,7 @@ server.use(logger);//use logger globally
 // next()
 // }
 function logger(req, res, next) {
-console.log(`used this is method ${req.method}, to this URL ${req.originalUrl}, at this time` + Date.now())
+console.log(`used this is method ${req.method}, to this URL ${req.originalUrl}, at this time ` +  Date.now())
 next()
 }
 
